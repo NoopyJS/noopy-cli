@@ -39,6 +39,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const commander_1 = require("commander");
 const fs = __importStar(require("fs"));
 const child_process_1 = require("child_process");
+const simple_git_1 = __importDefault(require("simple-git"));
 const inquirer_1 = __importDefault(require("inquirer"));
 const path_1 = __importDefault(require("path"));
 const program = new commander_1.Command();
@@ -83,18 +84,20 @@ program
         finalName = answers.name;
         finalPath = path_1.default.join(process.cwd(), finalName);
     }
+    console.log("Installing dependencies...");
+    // clone noopy templates repo
     try {
-        fs.mkdirSync(finalPath);
-        console.log("Installing dependencies...");
+        yield (0, simple_git_1.default)().clone('https://github.com/NoopyJS/noopy-template.git', finalPath);
         (0, child_process_1.execSync)(`npm init -y`, {
             cwd: finalPath,
-            stdio: 'inherit'
+            stdio: 'ignore'
         });
         console.log(`Project ${finalName} created.`);
         console.log(`You can now run 'cd ${finalName}' and 'noopy start' to run the project.`);
     }
     catch (e) {
         console.error(`An error occurred: ${e}`);
+        process.exit(1);
     }
 }));
 // @ts-ignore

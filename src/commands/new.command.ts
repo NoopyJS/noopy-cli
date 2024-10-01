@@ -2,6 +2,7 @@
 import {Command} from "commander";
 import * as fs from "fs";
 import {execSync} from "child_process";
+import git from "simple-git";
 import inquirer from 'inquirer';
 import path from "path";
 const program = new Command();
@@ -54,19 +55,21 @@ program
             finalName = answers.name;
             finalPath = path.join(process.cwd(), finalName);
         }
-
-        try {
-            fs.mkdirSync(finalPath);
             console.log("Installing dependencies...");
-            execSync(`npm init -y`, {
-                cwd: finalPath,
-                stdio: 'inherit'
-            });
-            console.log(`Project ${finalName} created.`);
-            console.log(`You can now run 'cd ${finalName}' and 'noopy start' to run the project.`);
-        } catch (e) {
-            console.error(`An error occurred: ${e}`);
-        }
+
+            // clone noopy templates repo
+            try {
+                await git().clone('https://github.com/NoopyJS/noopy-template.git', finalPath);
+                execSync(`npm init -y`, {
+                    cwd: finalPath,
+                    stdio: 'ignore'
+                });
+                console.log(`Project ${finalName} created.`);
+                console.log(`You can now run 'cd ${finalName}' and 'noopy start' to run the project.`);
+            } catch (e) {
+                console.error(`An error occurred: ${e}`);
+                process.exit(1);
+            }
 
 
     });
