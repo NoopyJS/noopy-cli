@@ -1,0 +1,22 @@
+{
+  "name": "noopy-cli",
+  "version": "1.0.0",
+  "description": "NoopyJS Framework CLI",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "noopy": "./src/commands/new.command.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.6.2"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "fs": "^0.0.1-security",
+    "path": "^0.12.7"
+  }
+}
