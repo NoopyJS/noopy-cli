@@ -6,6 +6,13 @@ import './commands/start.command';
 import './commands/new.command';
 import './commands/generate.command';
 
+import { PrettyConsole } from '../utils/PrettyConsole';
+export const prettyConsole = new PrettyConsole();
+
+prettyConsole.clear();
+prettyConsole.closeByNewLine = true;
+prettyConsole.useIcons = true;
+
 program
     .name('noopy')
     .description('CLI pour noopy')

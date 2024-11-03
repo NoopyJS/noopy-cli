@@ -41,9 +41,11 @@ const simple_git_1 = __importDefault(require("simple-git"));
 const inquirer_1 = __importDefault(require("inquirer"));
 const path_1 = __importDefault(require("path"));
 const index_1 = require("../index");
+const child_process_1 = require("child_process");
+const constants_1 = require("../constants/constants");
 const checkDirectoryExists = (projectPath, projectName) => {
     if (fs.existsSync(projectPath)) {
-        console.log(`ERROR: Folder ${projectName} already exists.`);
+        index_1.prettyConsole.error(constants_1.PROJECT_ALREADY_EXISTS, constants_1.CHOOSE_ANOTHER_NAME);
         process.exit(1);
     }
 };
@@ -57,7 +59,7 @@ const cloneGitRepo = (language, finalPath) => __awaiter(void 0, void 0, void 0, 
         }
     }
     catch (e) {
-        console.error(`An error occurred: ${e}`);
+        index_1.prettyConsole.error(constants_1.ERROR_OCCURRED, e);
         process.exit(1);
     }
 });
@@ -81,25 +83,37 @@ const promptQuestions = (projectName) => {
             message: 'Typescript ?',
             choices: ['Yes', 'No'],
             default: 'Yes',
+        },
+        {
+            type: 'checkbox',
+            name: 'features',
+            message: 'What features do you want to include ?',
+            choices: ['auth', 'orm', 'jest'],
         }
     ]);
 };
 index_1.program
     .command('new <project-name>')
     .description('Create a new project')
+    .alias('n')
     .action((projectName, options) => __awaiter(void 0, void 0, void 0, function* () {
     const projectPath = path_1.default.join(process.cwd(), projectName);
     let finalName = projectName;
     let finalPath = projectPath;
+    let typescript = false;
     checkDirectoryExists(projectPath, projectName);
-    console.log(`Creating a new project in ${projectPath}...`);
+    index_1.prettyConsole.info(`Creating a new project in ${projectPath}...`);
     const answers = yield promptQuestions(projectName);
+    typescript = answers.language === 'Yes';
+    console.log(answers.features);
     if (answers.name !== projectName) {
         finalName = answers.name;
         finalPath = path_1.default.join(process.cwd(), finalName);
     }
-    console.log("Installing dependencies...");
+    index_1.prettyConsole.info("Installing dependencies...");
     yield cloneGitRepo(answers.language, finalPath);
-    console.log(`Project ${finalName} created.`);
-    console.log(`You can now run 'cd ${finalName}' and 'noopy start' to run the project.`);
+    if (typescript) {
+        (0, child_process_1.execSync)('npm install', { stdio: 'ignore' });
+    }
+    index_1.prettyConsole.info(`Project ${finalName} initialized.`, `You can now run 'cd ${finalName}' and 'noopy start (--dev)' to start the project.`);
 }));
