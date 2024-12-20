@@ -64,7 +64,8 @@ index_1.program
 function createDecorator(name, withParams) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const decoratorsDir = 'src/decorators';
+            const isInSrcFolder = !fs.existsSync('src');
+            const decoratorsDir = isInSrcFolder ? path_1.default.join('decorators') : path_1.default.join('src', 'decorators');
             yield fs.promises.mkdir(decoratorsDir, { recursive: true });
             const decoratorFile = path_1.default.join(decoratorsDir, `${name}.ts`);
             if (fs.existsSync(decoratorFile)) {
@@ -77,7 +78,7 @@ function createDecorator(name, withParams) {
         catch (error) {
             index_1.prettyConsole.error(error);
         }
-        index_1.prettyConsole.success(`Decorator ${name} created successfully`, { icon: '🎉' });
+        index_1.prettyConsole.success(`Decorator ${name} created successfully`, 'You can find it in src/decorators');
     });
 }
 function generateDecoratorTemplate(name) {

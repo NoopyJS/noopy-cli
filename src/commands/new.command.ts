@@ -5,7 +5,6 @@ import inquirer from 'inquirer';
 import path from "path";
 import {prettyConsole, program} from "../index";
 import {execSync} from "child_process";
-import {Command} from "commander";
 import {CHOOSE_ANOTHER_NAME, ERROR_OCCURRED, PROJECT_ALREADY_EXISTS} from "../constants/constants";
 
 const checkDirectoryExists = (projectPath: string, projectName: string) => {
@@ -15,13 +14,9 @@ const checkDirectoryExists = (projectPath: string, projectName: string) => {
     }
 }
 
-const cloneGitRepo = async (language: string, finalPath: string) => {
+const cloneGitRepo = async (finalPath: string) => {
     try {
-        if(language === 'Yes') {
-            await git().clone('https://github.com/NoopyJS/noopy-typescript-template.git', finalPath);
-        } else {
-            await git().clone('https://github.com/NoopyJS/noopy-javascript-template.git', finalPath);
-        }
+        await git().clone('https://github.com/NoopyJS/noopy-typescript-template.git', finalPath);
     } catch (e) {
         prettyConsole.error(ERROR_OCCURRED, e);
         process.exit(1)
@@ -43,17 +38,10 @@ const promptQuestions = (projectName: string) => {
             default: '1.0.0'
         },
         {
-            type:'list',
-            name: 'language',
-            message: 'Typescript ?',
-            choices: ['Yes', 'No'],
-            default: 'Yes',
-        },
-        {
             type: 'checkbox',
             name: 'features',
             message: 'What features do you want to include ?',
-            choices: ['auth', 'orm', 'jest'],
+            choices: ['auth','cache','swagger'],
         }
     ]);
 }
@@ -67,14 +55,12 @@ program
         const projectPath = path.join(process.cwd(), projectName);
         let finalName = projectName;
         let finalPath = projectPath;
-        let typescript: boolean = false;
 
         checkDirectoryExists(projectPath, projectName);
 
         prettyConsole.info(`Creating a new project in ${projectPath}...`);
 
         const answers = await promptQuestions(projectName);
-        typescript = answers.language === 'Yes';
 
         console.log(answers.features)
 
@@ -85,10 +71,41 @@ program
 
         prettyConsole.info("Installing dependencies...");
 
-        await cloneGitRepo(answers.language, finalPath);
+        await cloneGitRepo(finalPath);
 
-        if(typescript) {
-            execSync('npm install', {stdio: 'ignore'})
+        // Update package.json
+        const packageJsonPath = path.join(finalPath, 'package.json');
+
+        // Edit to add our libs
+        const packageJson = require(packageJsonPath);
+
+        packageJson.name = finalName;
+        packageJson.version = answers.version;
+
+        if (!packageJson.dependencies) {
+            packageJson.dependencies = {};
+        }
+
+       /* if(answers.features.includes('auth')) {
+            packageJson.dependencies['noopy-auth'] = '^1.0.0';
+        }
+        if(answers.features.includes('cache')) {
+            packageJson.dependencies['noopy-cache'] = '^1.0.0';
+        }*/
+        if(answers.features.includes('swagger')) {
+            packageJson.dependencies['@noopyjs/swagger'] = '^0.0.3';
+            // add a script to generate swagger
+            packageJson.scripts['gen-swagger'] = "node node_modules/@noopyjs/swagger/dist/swagger-ui/swagger-generator.js";
+            packageJson.scripts['start'] = "node src/index.js";
+        }
+
+        await fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
+
+        try {
+            execSync('npm install', {cwd: finalPath, stdio: 'ignore'});
+        } catch (e: any) {
+            prettyConsole.error(ERROR_OCCURRED, e.message, 'Your project has been created but an error occurred while installing dependencies.');
+            process.exit(1);
         }
 
         prettyConsole.info(`Project ${finalName} initialized.`, `You can now run 'cd ${finalName}' and 'noopy start (--dev)' to start the project.`);

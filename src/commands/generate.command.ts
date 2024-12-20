@@ -27,7 +27,8 @@ program
 
 async function createDecorator(name: string, withParams: boolean) {
     try {
-        const decoratorsDir = 'src/decorators';
+        const isInSrcFolder = !fs.existsSync('src');
+        const decoratorsDir = isInSrcFolder ? path.join('decorators') : path.join('src', 'decorators');
         await fs.promises.mkdir(decoratorsDir, {recursive: true});
 
         const decoratorFile = path.join(decoratorsDir, `${name}.ts`);
@@ -43,7 +44,7 @@ async function createDecorator(name: string, withParams: boolean) {
         prettyConsole.error(error);
     }
 
-    prettyConsole.success(`Decorator ${name} created successfully`);
+    prettyConsole.success(`Decorator ${name} created successfully`, 'You can find it in src/decorators');
 }
 
 function generateDecoratorTemplate(name: string): string {
