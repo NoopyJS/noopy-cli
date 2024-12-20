@@ -31,15 +31,16 @@ jobs:
         env:
          CI: true
 
-      - name: Publish package
-        run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Commit and push updated package.json
         run: |
-            git config --global user.name "GitHub Actions"
-            git config --global user.email "actions@github.com"
+            git config --global user.name "Noopy Actions"
+            git config --global user.email "actions@noopy.com"
             git add package.json
-            git commit -m "chore: bump version"
+            git commit -m "update package version"
             git push
+
+      - name: Publish package
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
