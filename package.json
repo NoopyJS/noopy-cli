@@ -1,6 +1,6 @@
 {
-  "name": "noopy-cli",
-  "version": "1.0.0",
+  "name": "@noopyjs/noopy-cli",
+  "version": "0.0.0",
   "description": "NoopyJS Framework CLI",
   "main": "index.js",
   "scripts": {
