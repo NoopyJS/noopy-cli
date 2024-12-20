@@ -1,15 +1,16 @@
 {
   "name": "@noopyjs/noopy-cli",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "NoopyJS Framework CLI",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc"
   },
   "bin": {
     "noopy": "./src/index.js"
   },
-  "author": "",
+  "author": "NoopyJS",
   "license": "ISC",
   "devDependencies": {
     "@types/inquirer": "^9.0.7",
@@ -17,10 +18,10 @@
   },
   "dependencies": {
     "commander": "^12.1.0",
-    "typescript": "^5.6.2",
-    "inquirer": "^11.1.0",
     "fs": "^0.0.1-security",
+    "inquirer": "^11.1.0",
     "path": "^0.12.7",
-    "simple-git": "^3.27.0"
+    "simple-git": "^3.27.0",
+    "typescript": "^5.7.2"
   }
 }
