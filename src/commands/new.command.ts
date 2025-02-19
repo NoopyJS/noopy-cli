@@ -81,20 +81,21 @@ program
         }
 
         if(answers.features.includes('swagger')) {
-            execSync('npm install @noopyjs/swagger', {cwd: finalPath, stdio: 'ignore'});
+            packageJson.dependencies['@noopyjs/swagger'] = 'latest';
             packageJson.scripts['gen-swagger'] = "node node_modules/@noopyjs/swagger/dist/swagger-ui/swagger-generator.js";
         }
 
 
-        await fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson));
 
        /* if(answers.features.includes('auth')) {
             packageJson.dependencies['noopy-auth'] = '^1.0.0';
         }*/
 
         if(answers.features.includes('cache')) {
-            execSync('npm install @noopyjs/noopy-cache', {cwd: finalPath, stdio: 'ignore'});
+            packageJson.dependencies['@noopyjs/noopy-cache'] = 'latest';
         }
+
+        await fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson));
 
         try {
             execSync('npm install', {cwd: finalPath, stdio: 'ignore'});
