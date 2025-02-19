@@ -51,7 +51,6 @@ program
     .alias('n')
     .action(async(projectName: string, options) => {
 
-
         const projectPath = path.join(process.cwd(), projectName);
         let finalName = projectName;
         let finalPath = projectPath;
@@ -62,8 +61,6 @@ program
 
         const answers = await promptQuestions(projectName);
 
-        console.log(answers.features)
-
         if(answers.name !== projectName) {
             finalName = answers.name;
             finalPath = path.join(process.cwd(), finalName);
@@ -73,10 +70,7 @@ program
 
         await cloneGitRepo(finalPath);
 
-        // Update package.json
         const packageJsonPath = path.join(finalPath, 'package.json');
-
-        // Edit to add our libs
         const packageJson = require(packageJsonPath);
 
         packageJson.name = finalName;
@@ -86,20 +80,21 @@ program
             packageJson.dependencies = {};
         }
 
-       /* if(answers.features.includes('auth')) {
-            packageJson.dependencies['noopy-auth'] = '^1.0.0';
-        }
-        if(answers.features.includes('cache')) {
-            packageJson.dependencies['noopy-cache'] = '^1.0.0';
-        }*/
         if(answers.features.includes('swagger')) {
-            packageJson.dependencies['@noopyjs/swagger'] = '^0.0.3';
-            // add a script to generate swagger
+            execSync('npm install @noopyjs/swagger', {cwd: finalPath, stdio: 'ignore'});
             packageJson.scripts['gen-swagger'] = "node node_modules/@noopyjs/swagger/dist/swagger-ui/swagger-generator.js";
-            packageJson.scripts['start'] = "node src/index.js";
         }
 
-        await fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
+
+        await fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson));
+
+       /* if(answers.features.includes('auth')) {
+            packageJson.dependencies['noopy-auth'] = '^1.0.0';
+        }*/
+
+        if(answers.features.includes('cache')) {
+            execSync('npm install @noopyjs/noopy-cache', {cwd: finalPath, stdio: 'ignore'});
+        }
 
         try {
             execSync('npm install', {cwd: finalPath, stdio: 'ignore'});
