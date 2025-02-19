@@ -20,6 +20,7 @@
     "commander": "^12.1.0",
     "fs": "^0.0.1-security",
     "inquirer": "^11.1.0",
+    "jest": "^29.7.0",
     "path": "^0.12.7",
     "simple-git": "^3.27.0",
     "typescript": "^5.7.2"
