@@ -134,7 +134,7 @@ program
 function setupSwagger(app: Noopy, swaggerPath: string) {
     fs.readdir(swaggerUiDist.getAbsoluteFSPath(), (err, files) => {
         files.forEach(file => {
-            app.get(\'/api-docs/\' + file), (req: Request, res: Response) => {
+            app.get(\'/api-docs/\' + file, (req: Request, res: Response) => {
                 const filePath = path.join(swaggerUiDist.getAbsoluteFSPath(), file);
                 res.sendFile(filePath);
             });
@@ -154,9 +154,9 @@ function setupSwagger(app: Noopy, swaggerPath: string) {
 
 setupSwagger(app, swaggerJsonPath);`;
 
-            fs.writeFileSync(indexTsPath, indexTs.slice(0, lastImportIndex) + `import swaggerUiDist from 'swagger-ui-dist';\n` + indexTs.slice(lastImportIndex));
-
-            fs.writeFileSync(indexTsPath, indexTs.slice(0, appInitIndex) + setupSwagger + indexTs.slice(appInitIndex));
+            await fs.writeFileSync(indexTsPath, indexTs.slice(0, lastImportIndex) + `import swaggerUiDist from 'swagger-ui-dist';\n import import path from "path";\n
+import * as fs from "fs";` + indexTs.slice(lastImportIndex));
+            await fs.writeFileSync(indexTsPath, indexTs.slice(0, appInitIndex) + setupSwagger + indexTs.slice(appInitIndex));
 
 
         }
