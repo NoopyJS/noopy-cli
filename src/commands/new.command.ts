@@ -159,8 +159,8 @@ program
                 }
             }
         }
-    })`;
-            fs.writeFileSync(userControllerPath, userController.slice(0, getIndex) + swaggerAnnotation + userController.slice(getIndex));
+    })\n`;
+            fs.writeFileSync(userControllerPath, 'import {Swagger} from "@noopyjs/swagger";\n' + userController.slice(0, getIndex) + swaggerAnnotation + userController.slice(getIndex));
 
             const setupSwagger = `const swaggerJsonPath = path.join(__dirname, '../swagger.json');
 
