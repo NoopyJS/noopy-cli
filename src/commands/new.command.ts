@@ -203,13 +203,13 @@ setupSwagger(app, swaggerJsonPath);`;
 
             // Add NoopyCache.configure() in index.ts
             const appInitIndex = indexTs.indexOf('app.init()');
-            fs.writeFileSync(indexTsPath, "import {NoopyCache} from '@noopyjs/noopy-cache'" + indexTs.slice(0, appInitIndex) + 'NoopyCache.configure(new NoopyCache());\n' + indexTs.slice(appInitIndex));
+            fs.writeFileSync(indexTsPath, "import {NoopyCache} from '@noopyjs/noopy-cache'\n" + indexTs.slice(0, appInitIndex) + 'NoopyCache.configure(new NoopyCache());\n' + indexTs.slice(appInitIndex));
 
             const userServicesPath = path.join(finalPath, 'src', 'services', 'users.service.ts');
             const userServices = fs.readFileSync(userServicesPath, 'utf-8');
 
             const getAllUsersIndex = userServices.indexOf('getAllUsers() {');
-            fs.writeFileSync(userServicesPath, 'import {NoopyCache} from "@noopyjs/noopy-cache";\n' + userServices.slice(0, getAllUsersIndex) + '@Cache({ttl:60})\n' + userServices.slice(getAllUsersIndex));
+            fs.writeFileSync(userServicesPath, 'import {Cache} from "@noopyjs/noopy-cache";\n' + userServices.slice(0, getAllUsersIndex) + '@Cache({ttl:60})\n' + userServices.slice(getAllUsersIndex));
 
         }
 
