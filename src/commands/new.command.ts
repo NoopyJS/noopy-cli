@@ -81,7 +81,6 @@ program
         }
 
         const indexTsPath = path.join(finalPath, 'src', 'index.ts');
-        const indexTs = fs.readFileSync(indexTsPath, 'utf-8');
 
         if(answers.features.includes('swagger')) {
             packageJson.dependencies['@noopyjs/swagger'] = 'latest';
@@ -89,6 +88,9 @@ program
             packageJson.dependencies['reflect-metadata'] = '^0.2.2';
             packageJson.devDependencies['@types/swagger-ui-dist'] = 'latest';
             packageJson.scripts['gen-swagger'] = "node node_modules/@noopyjs/swagger/dist/swagger-ui/swagger-generator.js";
+
+            const indexTs = fs.readFileSync(indexTsPath, 'utf-8');
+            const appInitIndex = indexTs.indexOf('app.init()');
 
             const swaggerHtml = `<!DOCTYPE html>
 <html lang="en">
@@ -129,7 +131,6 @@ program
 `;
             fs.writeFileSync(path.join(finalPath, 'swagger.html'), swaggerHtml);
 
-            const appInitIndex = indexTs.indexOf('app.init()');
 
             const userControllerPath = path.join(finalPath, 'src', 'controllers', 'users.controller.ts');
             const userController = fs.readFileSync(userControllerPath, 'utf-8');
@@ -188,21 +189,14 @@ function setupSwagger(app: Noopy, swaggerPath: string) {
 
 setupSwagger(app, swaggerJsonPath);`;
             fs.writeFileSync(indexTsPath, `import * as fs from "fs";\nimport path from "path";\nimport swaggerUiDist from 'swagger-ui-dist';\n` + indexTs.slice(0, appInitIndex) + setupSwagger + indexTs.slice(appInitIndex));
-
-
         }
-
-
-
-       /* if(answers.features.includes('auth')) {
-            packageJson.dependencies['noopy-auth'] = '^1.0.0';
-        }*/
 
         if(answers.features.includes('cache')) {
             packageJson.dependencies['@noopyjs/noopy-cache'] = 'latest';
 
-            // Add NoopyCache.configure() in index.ts
+            const indexTs = fs.readFileSync(indexTsPath, 'utf-8');
             const appInitIndex = indexTs.indexOf('app.init()');
+
             fs.writeFileSync(indexTsPath, "import {NoopyCache} from '@noopyjs/noopy-cache'\n" + indexTs.slice(0, appInitIndex) + 'NoopyCache.configure(new NoopyCache());\n' + indexTs.slice(appInitIndex));
 
             const userServicesPath = path.join(finalPath, 'src', 'services', 'users.service.ts');
@@ -214,6 +208,11 @@ setupSwagger(app, swaggerJsonPath);`;
         }
 
         await fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson));
+
+
+        /* if(answers.features.includes('auth')) {
+             packageJson.dependencies['noopy-auth'] = '^1.0.0';
+         }*/
 
         try {
             execSync('npm install', {cwd: finalPath, stdio: 'ignore'});
