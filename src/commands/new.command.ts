@@ -83,6 +83,7 @@ program
         if(answers.features.includes('swagger')) {
             packageJson.dependencies['@noopyjs/swagger'] = 'latest';
             packageJson.dependencies['swagger-ui-dist'] = 'latest';
+            packageJson.devDependencies['@types/swagger-ui-dist'] = 'latest';
             packageJson.scripts['gen-swagger'] = "node node_modules/@noopyjs/swagger/dist/swagger-ui/swagger-generator.js";
 
             const swaggerHtml = `<!DOCTYPE html>
@@ -127,6 +128,7 @@ program
             const indexTsPath = path.join(finalPath, 'src', 'index.ts');
             const indexTs = fs.readFileSync(indexTsPath, 'utf-8');
             const appInitIndex = indexTs.indexOf('app.init()');
+            const lastImportIndex = indexTs.lastIndexOf('import');
             const setupSwagger = `const swaggerJsonPath = path.join(__dirname, '../swagger.json');
 
 function setupSwagger(app: Noopy, swaggerPath: string) {
@@ -151,6 +153,8 @@ function setupSwagger(app: Noopy, swaggerPath: string) {
 }
 
 setupSwagger(app, swaggerJsonPath);`;
+
+            fs.writeFileSync(indexTsPath, indexTs.slice(0, lastImportIndex) + `import swaggerUiDist from 'swagger-ui-dist';\n` + indexTs.slice(lastImportIndex));
 
             fs.writeFileSync(indexTsPath, indexTs.slice(0, appInitIndex) + setupSwagger + indexTs.slice(appInitIndex));
 
