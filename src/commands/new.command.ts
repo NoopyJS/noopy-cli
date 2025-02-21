@@ -83,6 +83,7 @@ program
         if(answers.features.includes('swagger')) {
             packageJson.dependencies['@noopyjs/swagger'] = 'latest';
             packageJson.dependencies['swagger-ui-dist'] = 'latest';
+            packageJson.dependencies['reflect-metadata'] = '^0.2.2';
             packageJson.devDependencies['@types/swagger-ui-dist'] = 'latest';
             packageJson.scripts['gen-swagger'] = "node node_modules/@noopyjs/swagger/dist/swagger-ui/swagger-generator.js";
 
@@ -129,8 +130,37 @@ program
             const indexTs = fs.readFileSync(indexTsPath, 'utf-8');
             const appInitIndex = indexTs.indexOf('app.init()');
 
+            const userControllerPath = path.join(finalPath, 'src', 'controllers', 'users.controller.ts');
+            const userController = fs.readFileSync(userControllerPath, 'utf-8');
+            const getIndex = userController.indexOf('@Get');
 
 
+            const swaggerAnnotation = `@Swagger({
+        path: '/users',
+        method: 'get',
+        summary: 'Get all users',
+        responses: {
+            200: {
+                description: 'A list of users',
+                content: {
+                    'application/json': {
+                        schema: {
+                            type: 'array',
+                            items: {
+                                type: 'object',
+                                properties: {
+                                    id: { type: 'number', example: 1 },
+                                    name: { type: 'string', example: 'John Doe' },
+                                    email: { type: 'string', example: 'john.doe@example.com' }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    })`;
+            fs.writeFileSync(userControllerPath, userController.slice(0, getIndex) + swaggerAnnotation + userController.slice(getIndex));
 
             const setupSwagger = `const swaggerJsonPath = path.join(__dirname, '../swagger.json');
 
@@ -156,7 +186,6 @@ function setupSwagger(app: Noopy, swaggerPath: string) {
 }
 
 setupSwagger(app, swaggerJsonPath);`;
-            
             fs.writeFileSync(indexTsPath, `import * as fs from "fs";\nimport path from "path";\nimport swaggerUiDist from 'swagger-ui-dist';\n` + indexTs.slice(0, appInitIndex) + setupSwagger + indexTs.slice(appInitIndex));
 
 
