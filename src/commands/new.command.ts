@@ -82,7 +82,79 @@ program
 
         if(answers.features.includes('swagger')) {
             packageJson.dependencies['@noopyjs/swagger'] = 'latest';
+            packageJson.dependencies['swagger-ui-dist'] = 'latest';
             packageJson.scripts['gen-swagger'] = "node node_modules/@noopyjs/swagger/dist/swagger-ui/swagger-generator.js";
+
+            const swaggerHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><!DOCTYPE html>
+        <html lang="en">
+        <head>
+        <meta charset='UTF-8'>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Swagger UI</title>
+    <link rel="stylesheet" href='/api-docs/swagger-ui.css'>
+</head>
+<body>
+<div id="swagger-ui"></div>
+<script src='/api-docs/swagger-ui-bundle.js'></script>
+<script src='/api-docs/swagger-ui-standalone-preset.js'></script>
+<script>
+    window.onload = () => {
+        window.ui = SwaggerUIBundle({
+            url: '/api-docs/swagger.json',
+            dom_id: '#swagger-ui',
+            presets: [
+                SwaggerUIBundle.presets.apis,
+                SwaggerUIStandalonePreset
+            ],
+            layout: "StandaloneLayout"
+        });
+    };
+</script>
+</body>
+</html></title>
+</head>
+<body>
+
+</body>
+</html>
+`;
+            fs.writeFileSync(path.join(finalPath, 'swagger.html'), swaggerHtml);
+
+            const indexTsPath = path.join(finalPath, 'src', 'index.ts');
+            const indexTs = fs.readFileSync(indexTsPath, 'utf-8');
+            const appInitIndex = indexTs.indexOf('app.init()');
+            const setupSwagger = `const swaggerJsonPath = path.join(__dirname, '../swagger.json');
+
+function setupSwagger(app: Noopy, swaggerPath: string) {
+    fs.readdir(swaggerUiDist.getAbsoluteFSPath(), (err, files) => {
+        files.forEach(file => {
+            app.get(\'/api-docs/\' + file), (req: Request, res: Response) => {
+                const filePath = path.join(swaggerUiDist.getAbsoluteFSPath(), file);
+                res.sendFile(filePath);
+            });
+        });
+    });
+
+    app.get('/api-docs/swagger.json', (req: Request, res: Response) => {
+        const test = JSON.parse(fs.readFileSync(swaggerPath, 'utf-8'));
+        res.json(test);
+    });
+
+    app.get('/api-docs', (req: Request, res: Response) => {
+        res.setHeader('Content-Type', 'text/html');
+        res.sendFile(path.join(__dirname, 'swagger.html'));
+    });
+}
+
+setupSwagger(app, swaggerJsonPath);`;
+
+            fs.writeFileSync(indexTsPath, indexTs.slice(0, appInitIndex) + setupSwagger + indexTs.slice(appInitIndex));
+
+
         }
 
 
