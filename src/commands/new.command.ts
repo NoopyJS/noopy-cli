@@ -128,8 +128,8 @@ program
             const indexTsPath = path.join(finalPath, 'src', 'index.ts');
             const indexTs = fs.readFileSync(indexTsPath, 'utf-8');
             const appInitIndex = indexTs.indexOf('app.init()');
-            
-            await fs.writeFileSync(indexTsPath, `import * as fs from "fs";\nimport path from "path";\nimport swaggerUiDist from 'swagger-ui-dist';\n` + indexTs);
+
+            fs.writeFileSync(indexTsPath, `import * as fs from "fs";\nimport path from "path";\nimport swaggerUiDist from 'swagger-ui-dist';\n` + indexTs);
 
             const setupSwagger = `const swaggerJsonPath = path.join(__dirname, '../swagger.json');
 
@@ -156,7 +156,7 @@ function setupSwagger(app: Noopy, swaggerPath: string) {
 
 setupSwagger(app, swaggerJsonPath);`;
 
-            await fs.writeFileSync(indexTsPath, indexTs.slice(0, appInitIndex) + setupSwagger + indexTs.slice(appInitIndex));
+            fs.writeFileSync(indexTsPath, indexTs.slice(0, appInitIndex) + setupSwagger + indexTs.slice(appInitIndex));
 
 
         }
