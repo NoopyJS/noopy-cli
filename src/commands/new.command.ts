@@ -128,7 +128,9 @@ program
             const indexTsPath = path.join(finalPath, 'src', 'index.ts');
             const indexTs = fs.readFileSync(indexTsPath, 'utf-8');
             const appInitIndex = indexTs.indexOf('app.init()');
-            const lastImportIndex = indexTs.lastIndexOf('import');
+            
+            await fs.writeFileSync(indexTsPath, `import * as fs from "fs";\nimport path from "path";\nimport swaggerUiDist from 'swagger-ui-dist';\n` + indexTs);
+
             const setupSwagger = `const swaggerJsonPath = path.join(__dirname, '../swagger.json');
 
 function setupSwagger(app: Noopy, swaggerPath: string) {
@@ -148,14 +150,12 @@ function setupSwagger(app: Noopy, swaggerPath: string) {
 
     app.get('/api-docs', (req: Request, res: Response) => {
         res.setHeader('Content-Type', 'text/html');
-        res.sendFile(path.join(__dirname, 'swagger.html'));
+        res.sendFile(path.join(__dirname, '../swagger.html'));
     });
 }
 
 setupSwagger(app, swaggerJsonPath);`;
 
-            await fs.writeFileSync(indexTsPath, indexTs.slice(0, lastImportIndex) + `import swaggerUiDist from 'swagger-ui-dist';\n import import path from "path";\n
-import * as fs from "fs";` + indexTs.slice(lastImportIndex));
             await fs.writeFileSync(indexTsPath, indexTs.slice(0, appInitIndex) + setupSwagger + indexTs.slice(appInitIndex));
 
 
